@@ -102,15 +102,18 @@ class Command
     else
       config.getResourcePath (@resourcePath) => callback(@resourcePath)
 
-  addBuildEnvVars: (env) ->
+  addBuildEnvVars: (env, callback) ->
     @updateWindowsEnv(env) if config.isWin32()
     @addNodeBinToEnv(env)
-    @addProxyToEnv(env)
+
     env.npm_config_runtime = "electron"
     env.npm_config_target = @electronVersion
     env.npm_config_disturl = config.getElectronUrl()
     env.npm_config_arch = config.getElectronArch()
     env.npm_config_target_arch = config.getElectronArch() # for node-pre-gyp
+
+    @addProxyToEnv env, (env) ->
+      callback(env)
 
   getNpmBuildFlags: ->
     ["--target=#{@electronVersion}", "--disturl=#{config.getElectronUrl()}", "--arch=#{config.getElectronArch()}"]
@@ -128,23 +131,25 @@ class Command
     else
       env[pathKey]= nodeBinFolder
 
-  addProxyToEnv: (env) ->
-    httpProxy = @npm.config.get('proxy')
-    if httpProxy
-      env.HTTP_PROXY ?= httpProxy
-      env.http_proxy ?= httpProxy
+  addProxyToEnv: (env, callback) ->
+    config.getSetting 'proxy', (httpProxy) ->
+      if httpProxy
+        env.HTTP_PROXY ?= httpProxy
+        env.http_proxy ?= httpProxy
 
-    httpsProxy = @npm.config.get('https-proxy')
-    if httpsProxy
-      env.HTTPS_PROXY ?= httpsProxy
-      env.https_proxy ?= httpsProxy
+      config.getSetting 'https-proxy', (httpsProxy) ->
+        if httpsProxy
+          env.HTTPS_PROXY ?= httpsProxy
+          env.https_proxy ?= httpsProxy
 
-      # node-gyp only checks HTTP_PROXY (as of node-gyp@4.0.0)
-      env.HTTP_PROXY ?= httpsProxy
-      env.http_proxy ?= httpsProxy
+          # node-gyp only checks HTTP_PROXY (as of node-gyp@4.0.0)
+          env.HTTP_PROXY ?= httpsProxy
+          env.http_proxy ?= httpsProxy
 
-    # node-gyp doesn't currently have an option for this so just set the
-    # environment variable to bypass strict SSL
-    # https://github.com/nodejs/node-gyp/issues/448
-    useStrictSsl = @npm.config.get('strict-ssl') ? true
-    env.NODE_TLS_REJECT_UNAUTHORIZED = 0 unless useStrictSsl
+        # node-gyp doesn't currently have an option for this so just set the
+        # environment variable to bypass strict SSL
+        # https://github.com/nodejs/node-gyp/issues/448
+        config.getSetting 'strict-ssl', (useStrictSsl) ->
+          useStrictSsl ?= true
+          env.NODE_TLS_REJECT_UNAUTHORIZED = 0 unless useStrictSsl
+          callback(env)

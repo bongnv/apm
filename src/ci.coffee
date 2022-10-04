@@ -51,19 +51,18 @@ class Ci extends Command
     fs.makeTreeSync(@atomDirectory)
 
     env = _.extend({}, process.env, {HOME: @atomNodeDirectory, RUSTUP_HOME: config.getRustupHomeDirPath()})
-    @addBuildEnvVars(env)
 
-    installOptions = {env, streaming: options.argv.verbose}
+    @addBuildEnvVars env, (env) =>
+      installOptions = {env, streaming: options.argv.verbose}
 
-    @fork @atomNpmPath, installArgs, installOptions, (args...) =>
-      @logCommandResults(callback, args...)
+      @fork @atomNpmPath, installArgs, installOptions, (args...) =>
+        @logCommandResults(callback, args...)
 
   run: (options) ->
     {callback} = options
     opts = @parseOptions(options.commandArgs)
 
     commands = []
-    commands.push (callback) => config.loadNpm (error, @npm) => callback(error)
     commands.push (cb) => @loadInstalledAtomMetadata(cb)
     commands.push (cb) => @installModules(opts, cb)
 

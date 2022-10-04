@@ -41,20 +41,18 @@ class Rebuild extends Command
     fs.makeTreeSync(@atomDirectory)
 
     env = _.extend({}, process.env, {HOME: @atomNodeDirectory, RUSTUP_HOME: config.getRustupHomeDirPath()})
-    @addBuildEnvVars(env)
-
-    @fork(@atomNpmPath, rebuildArgs, {env}, callback)
+    @addBuildEnvVars env, (env) =>
+      @fork(@atomNpmPath, rebuildArgs, {env}, callback)
 
   run: (options) ->
     {callback} = options
     options = @parseOptions(options.commandArgs)
 
-    config.loadNpm (error, @npm) =>
-      @loadInstalledAtomMetadata =>
-        @forkNpmRebuild options, (code, stderr='') =>
-          if code is 0
-            @logSuccess()
-            callback()
-          else
-            @logFailure()
-            callback(stderr)
+    @loadInstalledAtomMetadata =>
+      @forkNpmRebuild options, (code, stderr='') =>
+        if code is 0
+          @logSuccess()
+          callback()
+        else
+          @logFailure()
+          callback(stderr)

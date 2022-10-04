@@ -1,7 +1,6 @@
 child_process = require 'child_process'
 fs = require './fs'
 path = require 'path'
-npm = require 'npm'
 semver = require 'semver'
 asarPath = null
 
@@ -108,14 +107,18 @@ module.exports =
     else
       fs.existsSync(path.join(@x86ProgramFilesDirectory(), "Microsoft Visual Studio", "#{version}", "BuildTools", "Common7", "IDE")) or fs.existsSync(path.join(@x86ProgramFilesDirectory(), "Microsoft Visual Studio", "#{version}", "Community", "Common7", "IDE")) or fs.existsSync(path.join(@x86ProgramFilesDirectory(), "Microsoft Visual Studio", "#{version}", "Enterprise", "Common7", "IDE")) or fs.existsSync(path.join(@x86ProgramFilesDirectory(), "Microsoft Visual Studio", "#{version}", "Professional", "Common7", "IDE")) or fs.existsSync(path.join(@x86ProgramFilesDirectory(), "Microsoft Visual Studio", "#{version}", "WDExpress", "Common7", "IDE"))
 
-  loadNpm: (callback) ->
-    npmOptions =
-      userconfig: @getUserConfigPath()
-      globalconfig: @getGlobalConfigPath()
-    npm.load npmOptions, -> callback(null, npm)
-
   getSetting: (key, callback) ->
-    @loadNpm -> callback(npm.config.get(key))
+    args = [require.resolve('npm/bin/npm-cli'), '--globalconfig', @getGlobalConfigPath(), '--userconfig', @getUserConfigPath(), 'config', 'get', key]
+    spawned = child_process.spawn(process.execPath, args)
+    outputChunks = []
+    spawned.stderr.on 'data', (chunk) -> outputChunks.push(chunk)
+    spawned.stdout.on 'data', (chunk) -> outputChunks.push(chunk)
+    spawned.on 'error', ->
+    spawned.on 'close', (code) ->
+      if code is 0
+        [name, result] = Buffer.concat(outputChunks).toString().split(' ')
+        result = result?.trim()
+      callback(result)
 
   setupApmRcFile: ->
     try

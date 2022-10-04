@@ -48,12 +48,11 @@ class Dedupe extends Command
     fs.makeTreeSync(@atomDirectory)
 
     env = _.extend({}, process.env, {HOME: @atomNodeDirectory, RUSTUP_HOME: config.getRustupHomeDirPath()})
-    @addBuildEnvVars(env)
+    @addBuildEnvVars env, (env) =>
+      dedupeOptions = {env}
+      dedupeOptions.cwd = options.cwd if options.cwd
 
-    dedupeOptions = {env}
-    dedupeOptions.cwd = options.cwd if options.cwd
-
-    @fork(@atomNpmPath, dedupeArgs, dedupeOptions, callback)
+      @fork(@atomNpmPath, dedupeArgs, dedupeOptions, callback)
 
   createAtomDirectories: ->
     fs.makeTreeSync(@atomDirectory)

@@ -1,23 +1,19 @@
-npm = require 'npm'
 request = require 'request'
 
 config = require './apm'
 
-loadNpm = (callback) ->
-  npmOptions =
-    userconfig: config.getUserConfigPath()
-    globalconfig: config.getGlobalConfigPath()
-  npm.load(npmOptions, callback)
-
 configureRequest = (requestOptions, callback) ->
-  loadNpm ->
-    requestOptions.proxy ?= npm.config.get('https-proxy') or npm.config.get('proxy') or process.env.HTTPS_PROXY or process.env.HTTP_PROXY
-    requestOptions.strictSSL ?= npm.config.get('strict-ssl')
+  config.getSetting 'proxy', (proxy) ->
+    config.getSetting 'https-proxy', (httpsProxy) ->
+      config.getSetting 'strict-ssl', (strictSsl) ->
+        config.getSetting 'user-agent', (userAgent) ->
+          requestOptions.proxy ?= httpsProxy or proxy or process.env.HTTPS_PROXY or process.env.HTTP_PROXY
+          requestOptions.strictSSL ?= strictSsl
 
-    userAgent = npm.config.get('user-agent') ? "AtomApm/#{require('../package.json').version}"
-    requestOptions.headers ?= {}
-    requestOptions.headers['User-Agent'] ?= userAgent
-    callback()
+          userAgent = userAgent ? "AtomApm/#{require('../package.json').version}"
+          requestOptions.headers ?= {}
+          requestOptions.headers['User-Agent'] ?= userAgent
+          callback()
 
 module.exports =
   get: (requestOptions, callback) ->

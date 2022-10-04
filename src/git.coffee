@@ -1,7 +1,6 @@
 {spawn} = require 'child_process'
 path = require 'path'
 _ = require 'underscore-plus'
-npm = require 'npm'
 config = require './apm'
 fs = require './fs'
 
@@ -50,11 +49,8 @@ exports.addGitToEnv = (env) ->
   addGitBashToEnv(env)
 
 exports.getGitVersion = (callback) ->
-  npmOptions =
-    userconfig: config.getUserConfigPath()
-    globalconfig: config.getGlobalConfigPath()
-  npm.load npmOptions, ->
-    git = npm.config.get('git') ? 'git'
+  config.getSetting 'git', (git) ->
+    git ?= 'git'
     exports.addGitToEnv(process.env)
     spawned = spawn(git, ['--version'])
     outputChunks = []
