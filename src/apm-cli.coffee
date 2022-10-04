@@ -3,7 +3,6 @@ path = require 'path'
 
 _ = require 'underscore-plus'
 colors = require 'colors'
-npm = require 'npm'
 yargs = require 'yargs'
 wordwrap = require 'wordwrap'
 
@@ -144,11 +143,8 @@ getAtomVersion = (callback) ->
       callback(unknownVersion)
 
 getPythonVersion = (callback) ->
-  npmOptions =
-    userconfig: config.getUserConfigPath()
-    globalconfig: config.getGlobalConfigPath()
-  npm.load npmOptions, ->
-    python = npm.config.get('python') ? process.env.PYTHON
+  config.getSetting 'python', (python) =>
+    python ?= process.env.PYTHON
     if config.isWin32() and not python
       rootDir = process.env.SystemDrive ? 'C:\\'
       rootDir += '\\' unless rootDir[rootDir.length - 1] is '\\'
