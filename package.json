@@ -23,7 +23,7 @@
     "coffee": "coffee --compile --output lib src",
     "build": "npm run clean:lib && npm run coffee",
     "prepare": "npm run build",
-    "postinstall": "node script/postinstall.js",
+    "postprepare": "node script/postinstall.js",
     "test": "npm run check-version && npm run lint && jasmine-focused --captureExceptions --coffee spec"
   },
   "dependencies": {
@@ -39,7 +39,7 @@
     "keytar": "^7.7.0",
     "mv": "2.1.1",
     "ncp": "~2.0.0",
-    "npm": "^8.15.0",
+    "npm": "^8.19.2",
     "open": "7.3.0",
     "q": "~1.5.1",
     "read": "~1.0.7",
@@ -59,7 +59,7 @@
     "coffeelint": "<2.0",
     "express": "^4.17.1",
     "jasmine-focused": ">=1.0.7 <2.0",
-    "node-gyp": "^5.1.1",
+    "node-gyp": "^9.2.0",
     "shx": "^0.3.3"
   }
 }
