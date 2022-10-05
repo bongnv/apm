@@ -129,22 +129,24 @@ class Command
       env[pathKey]= nodeBinFolder
 
   addProxyToEnv: (env) ->
-    httpProxy = @npm.config.get('proxy')
-    if httpProxy
-      env.HTTP_PROXY ?= httpProxy
-      env.http_proxy ?= httpProxy
+    config.getSetting 'proxy', (httpProxy) ->
+      if httpProxy
+        env.HTTP_PROXY ?= httpProxy
+        env.http_proxy ?= httpProxy
 
-    httpsProxy = @npm.config.get('https-proxy')
-    if httpsProxy
-      env.HTTPS_PROXY ?= httpsProxy
-      env.https_proxy ?= httpsProxy
+    config.getSetting 'https-proxy', (httpsProxy) ->
+      if httpsProxy
+        env.HTTPS_PROXY ?= httpsProxy
+        env.https_proxy ?= httpsProxy
 
-      # node-gyp only checks HTTP_PROXY (as of node-gyp@4.0.0)
-      env.HTTP_PROXY ?= httpsProxy
-      env.http_proxy ?= httpsProxy
+        # node-gyp only checks HTTP_PROXY (as of node-gyp@4.0.0)
+        env.HTTP_PROXY ?= httpsProxy
+        env.http_proxy ?= httpsProxy
+
 
     # node-gyp doesn't currently have an option for this so just set the
     # environment variable to bypass strict SSL
     # https://github.com/nodejs/node-gyp/issues/448
-    useStrictSsl = @npm.config.get('strict-ssl') ? true
-    env.NODE_TLS_REJECT_UNAUTHORIZED = 0 unless useStrictSsl
+    config.getSetting 'strict-ssl', (useStrictSsl) ->
+      useStrictSsl = useStrictSsl ? true
+      env.NODE_TLS_REJECT_UNAUTHORIZED = 0 unless useStrictSsl

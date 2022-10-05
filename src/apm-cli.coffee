@@ -143,7 +143,7 @@ getAtomVersion = (callback) ->
       callback(unknownVersion)
 
 getPythonVersion = (callback) ->
-  config.getSetting 'python', (python) =>
+  config.getSetting 'python', (python) ->
     python ?= process.env.PYTHON
     if config.isWin32() and not python
       rootDir = process.env.SystemDrive ? 'C:\\'

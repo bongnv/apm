@@ -49,12 +49,11 @@ class Rebuild extends Command
     {callback} = options
     options = @parseOptions(options.commandArgs)
 
-    config.loadNpm (error, @npm) =>
-      @loadInstalledAtomMetadata =>
-        @forkNpmRebuild options, (code, stderr='') =>
-          if code is 0
-            @logSuccess()
-            callback()
-          else
-            @logFailure()
-            callback(stderr)
+    @loadInstalledAtomMetadata =>
+      @forkNpmRebuild options, (code, stderr='') =>
+        if code is 0
+          @logSuccess()
+          callback()
+        else
+          @logFailure()
+          callback(stderr)

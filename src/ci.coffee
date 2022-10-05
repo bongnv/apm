@@ -63,7 +63,6 @@ class Ci extends Command
     opts = @parseOptions(options.commandArgs)
 
     commands = []
-    commands.push (callback) => config.loadNpm (error, @npm) => callback(error)
     commands.push (cb) => @loadInstalledAtomMetadata(cb)
     commands.push (cb) => @installModules(opts, cb)
 

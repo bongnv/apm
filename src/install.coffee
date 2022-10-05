@@ -558,9 +558,8 @@ class Install extends Command
     @createAtomDirectories()
 
     if options.argv.check
-      config.loadNpm (error, @npm) =>
-        @loadInstalledAtomMetadata =>
-          @checkNativeBuildTools(callback)
+      @loadInstalledAtomMetadata =>
+        @checkNativeBuildTools(callback)
       return
 
     @verbose = options.argv.verbose
@@ -600,7 +599,6 @@ class Install extends Command
       packageNames.push('.') if packageNames.length is 0
 
     commands = []
-    commands.push (callback) => config.loadNpm (error, @npm) => callback(error)
     commands.push (callback) => @loadInstalledAtomMetadata -> callback()
     packageNames.forEach (packageName) ->
       commands.push (callback) -> installPackage(packageName, callback)
