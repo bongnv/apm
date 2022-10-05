@@ -19,7 +19,7 @@ class Publish extends Command
   constructor: ->
     super()
     @userConfigPath = config.getUserConfigPath()
-    @atomNpmPath = require.resolve('npm/bin/npm-cli')
+    @atomNpmPath = path.join(path.dirname(require.resolve('npm')), 'bin/npm-cli.js')
 
   parseOptions: (argv) ->
     options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))

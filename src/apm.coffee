@@ -108,16 +108,9 @@ module.exports =
       fs.existsSync(path.join(@x86ProgramFilesDirectory(), "Microsoft Visual Studio", "#{version}", "BuildTools", "Common7", "IDE")) or fs.existsSync(path.join(@x86ProgramFilesDirectory(), "Microsoft Visual Studio", "#{version}", "Community", "Common7", "IDE")) or fs.existsSync(path.join(@x86ProgramFilesDirectory(), "Microsoft Visual Studio", "#{version}", "Enterprise", "Common7", "IDE")) or fs.existsSync(path.join(@x86ProgramFilesDirectory(), "Microsoft Visual Studio", "#{version}", "Professional", "Common7", "IDE")) or fs.existsSync(path.join(@x86ProgramFilesDirectory(), "Microsoft Visual Studio", "#{version}", "WDExpress", "Common7", "IDE"))
 
   getSetting: (key, callback) ->
-    args = [require.resolve('npm/bin/npm-cli'), '--globalconfig', @getGlobalConfigPath(), '--userconfig', @getUserConfigPath(), 'config', 'get', key]
-<<<<<<< HEAD
-<<<<<<< HEAD
+    atomNpmPath = path.join(path.dirname(require.resolve('npm')), 'bin/npm-cli.js')
+    args = [atomNpmPath, '--globalconfig', @getGlobalConfigPath(), '--userconfig', @getUserConfigPath(), 'config', 'get', key]
     spawned = child_process.spawn(process.execPath, args)
-=======
-    spawned = spawn(process.execPath, args)
->>>>>>> 6ccf056 (Remove the dependency on npm APIs)
-=======
-    spawned = child_process.spawn(process.execPath, args)
->>>>>>> 1d69e2a (Rmove the dependency on npm APIs)
     outputChunks = []
     spawned.stderr.on 'data', (chunk) -> outputChunks.push(chunk)
     spawned.stdout.on 'data', (chunk) -> outputChunks.push(chunk)

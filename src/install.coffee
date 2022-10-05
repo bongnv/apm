@@ -26,7 +26,7 @@ class Install extends Command
     @atomDirectory = config.getAtomDirectory()
     @atomPackagesDirectory = path.join(@atomDirectory, 'packages')
     @atomNodeDirectory = path.join(@atomDirectory, '.node-gyp')
-    @atomNpmPath = require.resolve('npm/bin/npm-cli')
+    @atomNpmPath = path.join(path.dirname(require.resolve('npm')), 'bin/npm-cli.js')
     @repoLocalPackagePathRegex = /^file:(?!\/\/)(.*)/
 
   parseOptions: (argv) ->
@@ -89,7 +89,7 @@ class Install extends Command
           if installGlobally
             commands = []
             children = fs.readdirSync(nodeModulesDirectory)
-              .filter (dir) -> dir isnt ".bin"
+              .filter (dir) -> dir isnt ".bin" and dir isnt ".package-lock.json"
             assert.equal(children.length, 1, "Expected there to only be one child in node_modules")
             child = children[0]
             source = path.join(nodeModulesDirectory, child)
@@ -367,7 +367,7 @@ class Install extends Command
   checkNativeBuildTools: (callback) ->
     process.stdout.write 'Checking for native build tools '
 
-    buildArgs = ['--globalconfig', config.getGlobalConfigPath(), '--userconfig', config.getUserConfigPath(), 'build']
+    buildArgs = ['--globalconfig', config.getGlobalConfigPath(), '--userconfig', config.getUserConfigPath(), 'install', '--dry-run']
     buildArgs.push(path.resolve(__dirname, '..', 'native-module'))
     buildArgs.push(@getNpmBuildFlags()...)
 

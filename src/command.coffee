@@ -116,7 +116,7 @@ class Command
       callback(env)
 
   getNpmBuildFlags: ->
-    ["--target=#{@electronVersion}", "--disturl=#{config.getElectronUrl()}", "--arch=#{config.getElectronArch()}"]
+    ["--target=#{@electronVersion}", "--disturl=#{config.getElectronUrl()}", "--arch=#{config.getElectronArch()}", "--openssl_fips=''"]
 
   updateWindowsEnv: (env) ->
     env.USERPROFILE = env.HOME
@@ -131,17 +131,12 @@ class Command
     else
       env[pathKey]= nodeBinFolder
 
-<<<<<<< HEAD
   addProxyToEnv: (env, callback) ->
-=======
-  addProxyToEnv: (env) ->
->>>>>>> 1d69e2a (Rmove the dependency on npm APIs)
     config.getSetting 'proxy', (httpProxy) ->
       if httpProxy
         env.HTTP_PROXY ?= httpProxy
         env.http_proxy ?= httpProxy
 
-<<<<<<< HEAD
       config.getSetting 'https-proxy', (httpsProxy) ->
         if httpsProxy
           env.HTTPS_PROXY ?= httpsProxy
@@ -158,21 +153,3 @@ class Command
           useStrictSsl ?= true
           env.NODE_TLS_REJECT_UNAUTHORIZED = 0 unless useStrictSsl
           callback(env)
-=======
-    config.getSetting 'https-proxy', (httpsProxy) ->
-      if httpsProxy
-        env.HTTPS_PROXY ?= httpsProxy
-        env.https_proxy ?= httpsProxy
-
-        # node-gyp only checks HTTP_PROXY (as of node-gyp@4.0.0)
-        env.HTTP_PROXY ?= httpsProxy
-        env.http_proxy ?= httpsProxy
-
-
-    # node-gyp doesn't currently have an option for this so just set the
-    # environment variable to bypass strict SSL
-    # https://github.com/nodejs/node-gyp/issues/448
-    config.getSetting 'strict-ssl', (useStrictSsl) ->
-      useStrictSsl = useStrictSsl ? true
-      env.NODE_TLS_REJECT_UNAUTHORIZED = 0 unless useStrictSsl
->>>>>>> 1d69e2a (Rmove the dependency on npm APIs)

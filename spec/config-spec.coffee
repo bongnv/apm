@@ -16,6 +16,7 @@ describe "apm config", ->
 
     # Make sure the cache used is the one for the test env
     delete process.env.npm_config_cache
+    delete process.env.npm_config_globalconfig
 
   describe "apm config get", ->
     it "reads the value from the global config when there is no user config", ->

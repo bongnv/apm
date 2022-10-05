@@ -16,7 +16,7 @@ class Rebuild extends Command
     super()
     @atomDirectory = config.getAtomDirectory()
     @atomNodeDirectory = path.join(@atomDirectory, '.node-gyp')
-    @atomNpmPath = require.resolve('npm/bin/npm-cli')
+    @atomNpmPath = path.join(path.dirname(require.resolve('npm')), 'bin/npm-cli.js')
 
   parseOptions: (argv) ->
     options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
