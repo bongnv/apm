@@ -66,7 +66,7 @@ module.exports =
     process.env.ATOM_REPOS_HOME ? path.join(@getHomeDirectory(), 'github')
 
   getElectronUrl: ->
-    process.env.ATOM_ELECTRON_URL ? 'https://atom.io/download/electron'
+    process.env.ATOM_ELECTRON_URL ? 'https://electronjs.org/headers'
 
   getAtomPackagesUrl: ->
     process.env.ATOM_PACKAGES_URL ? "#{@getAtomApiUrl()}/packages"
