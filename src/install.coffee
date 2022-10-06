@@ -74,47 +74,46 @@ class Install extends Command
     fs.makeTreeSync(@atomDirectory)
 
     env = _.extend({}, process.env, {HOME: @atomNodeDirectory, RUSTUP_HOME: config.getRustupHomeDirPath()})
-    @addBuildEnvVars(env)
+    @addBuildEnvVars env, (env) =>
+      installOptions = {env}
+      installOptions.streaming = true if @verbose
 
-    installOptions = {env}
-    installOptions.streaming = true if @verbose
+      if installGlobally
+        installDirectory = temp.mkdirSync('apm-install-dir-')
+        nodeModulesDirectory = path.join(installDirectory, 'node_modules')
+        fs.makeTreeSync(nodeModulesDirectory)
+        installOptions.cwd = installDirectory
 
-    if installGlobally
-      installDirectory = temp.mkdirSync('apm-install-dir-')
-      nodeModulesDirectory = path.join(installDirectory, 'node_modules')
-      fs.makeTreeSync(nodeModulesDirectory)
-      installOptions.cwd = installDirectory
+      @fork @atomNpmPath, installArgs, installOptions, (code, stderr='', stdout='') =>
+        if code is 0
+          if installGlobally
+            commands = []
+            children = fs.readdirSync(nodeModulesDirectory)
+              .filter (dir) -> dir isnt ".bin"
+            assert.equal(children.length, 1, "Expected there to only be one child in node_modules")
+            child = children[0]
+            source = path.join(nodeModulesDirectory, child)
+            destination = path.join(@atomPackagesDirectory, child)
+            commands.push (next) -> fs.cp(source, destination, next)
+            commands.push (next) => @buildModuleCache(pack.name, next)
+            commands.push (next) => @warmCompileCache(pack.name, next)
 
-    @fork @atomNpmPath, installArgs, installOptions, (code, stderr='', stdout='') =>
-      if code is 0
-        if installGlobally
-          commands = []
-          children = fs.readdirSync(nodeModulesDirectory)
-            .filter (dir) -> dir isnt ".bin"
-          assert.equal(children.length, 1, "Expected there to only be one child in node_modules")
-          child = children[0]
-          source = path.join(nodeModulesDirectory, child)
-          destination = path.join(@atomPackagesDirectory, child)
-          commands.push (next) -> fs.cp(source, destination, next)
-          commands.push (next) => @buildModuleCache(pack.name, next)
-          commands.push (next) => @warmCompileCache(pack.name, next)
-
-          async.waterfall commands, (error) =>
-            if error?
-              @logFailure()
-            else
-              @logSuccess() unless options.argv.json
-            callback(error, {name: child, installPath: destination})
+            async.waterfall commands, (error) =>
+              if error?
+                @logFailure()
+              else
+                @logSuccess() unless options.argv.json
+              callback(error, {name: child, installPath: destination})
+          else
+            callback(null, {name: child, installPath: destination})
         else
-          callback(null, {name: child, installPath: destination})
-      else
-        if installGlobally
-          fs.removeSync(installDirectory)
-          @logFailure()
+          if installGlobally
+            fs.removeSync(installDirectory)
+            @logFailure()
 
-        error = "#{stdout}\n#{stderr}"
-        error = @getGitErrorMessage(pack) if error.indexOf('code ENOGIT') isnt -1
-        callback(error)
+          error = "#{stdout}\n#{stderr}"
+          error = @getGitErrorMessage(pack) if error.indexOf('code ENOGIT') isnt -1
+          callback(error)
 
   getGitErrorMessage: (pack) ->
     message = """
@@ -166,13 +165,12 @@ class Install extends Command
     fs.makeTreeSync(@atomDirectory)
 
     env = _.extend({}, process.env, {HOME: @atomNodeDirectory, RUSTUP_HOME: config.getRustupHomeDirPath()})
-    @addBuildEnvVars(env)
+    @addBuildEnvVars env, (env) =>
+      installOptions = {env}
+      installOptions.cwd = options.cwd if options.cwd
+      installOptions.streaming = true if @verbose
 
-    installOptions = {env}
-    installOptions.cwd = options.cwd if options.cwd
-    installOptions.streaming = true if @verbose
-
-    @fork(@atomNpmPath, installArgs, installOptions, callback)
+      @fork(@atomNpmPath, installArgs, installOptions, callback)
 
   # Request package information from the atom.io API for a given package name.
   #
@@ -376,15 +374,14 @@ class Install extends Command
     fs.makeTreeSync(@atomDirectory)
 
     env = _.extend({}, process.env, {HOME: @atomNodeDirectory, RUSTUP_HOME: config.getRustupHomeDirPath()})
-    @addBuildEnvVars(env)
+    @addBuildEnvVars env, (env) =>
+      buildOptions = {env}
+      buildOptions.streaming = true if @verbose
 
-    buildOptions = {env}
-    buildOptions.streaming = true if @verbose
+      fs.removeSync(path.resolve(__dirname, '..', 'native-module', 'build'))
 
-    fs.removeSync(path.resolve(__dirname, '..', 'native-module', 'build'))
-
-    @fork @atomNpmPath, buildArgs, buildOptions, (args...) =>
-      @logCommandResults(callback, args...)
+      @fork @atomNpmPath, buildArgs, buildOptions, (args...) =>
+        @logCommandResults(callback, args...)
 
   packageNamesFromPath: (filePath) ->
     filePath = path.resolve(filePath)
