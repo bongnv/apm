@@ -1,7 +1,7 @@
 {
   "name": "@atom-ide-community/atom-package-manager",
   "description": "Community build of the Atom package manager",
-  "version": "3.0.0-atomic.1",
+  "version": "3.0.0-atomic.2",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -22,8 +22,9 @@
     "lint": "coffeelint src spec",
     "coffee": "coffee --compile --output lib src",
     "build": "npm run clean:lib && npm run coffee",
+    "rebuild:apm": "./bin/node ./script/rebuild.js",
     "prepare": "npm run build",
-    "preprepare": "node script/postinstall.js",
+    "postinstall": "node script/postinstall.js",
     "test": "npm run check-version && npm run lint && jasmine-focused --captureExceptions --coffee spec",
     "test:only": "jasmine-focused --verbose --captureExceptions --coffee spec"
   },
